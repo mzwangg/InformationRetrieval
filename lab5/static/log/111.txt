@@ -1,0 +1,25 @@
+search 西游记
+click 西游记（全二册） 1029553
+sanpshot 西游记（全二册） 1029553
+search 西游记
+search 余秋雨
+search b*k
+search b??k
+search b??k
+search b??k
+search book
+search b[ac]+k
+search b??k
+search b[ac]+k
+search bo{2}k
+search 水星记
+click 太白金星有点烦 36328704
+search 水星记
+search 西游记
+search 剑来
+click 剑来1：少年起微末 35022388
+sanpshot 剑来1：少年起微末 35022388
+click 剑来10：他乡遇故知 35192928
+click 剑来10：他乡遇故知 35192928
+search 剑来
+search 剑来1

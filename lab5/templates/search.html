@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    form {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    input[type="submit"] {
+      background-color: #007BFF;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+
+    .search-results {
+      max-width: 800px;
+      margin: 20px auto;
+    }
+
+    .result {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    h2 {
+      color: #007BFF;
+    }
+
+    p {
+      color: #555;
+    }
+
+    .result-link {
+      text-decoration: none;
+      color: #007BFF;
+    }
+
+    .result-link:hover {
+      text-decoration: underline;
+    }
+
+    .like-section {
+      max-width: 800px;
+      margin: 20px auto;
+    }
+
+    .like-item {
+      /* margin-bottom: 20px; */
+      padding: 15px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .like-item a {
+      text-decoration: none;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .like-item:hover {
+      background-color: #eaeaea;
+    }
+  </style>
+</head>
+<body>
+  <h1>查询</h1>
+
+  <form method="post">
+    <div>
+      <label for="time_begin">开始时间：</label>
+      <input type="date" name="time_begin" id="time_begin">
+      
+      <label for="time_end">结束时间：</label>
+      <input type="date" name="time_end" id="time_end">
+    </div>
+
+    <div>
+      <label for="domain">关键词位置：</label>
+      <select name="domain" id="domain">
+        <option value="all">网页任何地方</option>
+        <option value="title">仅网页标题中</option>
+        <option value="intro">仅正文中</option>
+        <option value="author">仅作者中</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="pattern">查询模式：</label>
+      <select name="pattern" id="pattern">
+        <option value="match">普通查询</option>
+        <option value="wildcard">通配符查询</option>
+        <option value="regexp">正则表达式查询</option>
+        <option value="phrase">短语查询</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="web">站内查询：</label>
+      <input type="text" name="web" id="web" placeholder="例如：music.douban.com">
+    </div>
+
+    <div>
+      <label for="querys">查询框：</label>
+      <input type="text" name="querys" id="querys" placeholder="请输入查询关键词">
+    </div>
+
+    <input type="submit" value="查询">
+  </form>
+
+  <div class="like-section">
+    <h2>猜你喜欢</h2>
+    {% for recommend_result in recommend_results %}
+      <div class="like-item">
+        <a href="#" class="recommend-link" data-url="{{ recommend_result.url }}">{{ recommend_result.title }}</a>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="search-results">
+    <h2>搜索结果</h2>
+    <!-- 循环展示查询结果 -->
+    {% for search_result in search_results %}
+      <div class="result">
+        <!-- 标题 -->
+        <h2><a href="#" class="result-link" data-url="{{ search_result.url }}">{{ search_result.title }}</a></h2>
+
+        <!-- 正文，字数限制为200字 -->
+        <p>{{ search_result.intro[:200] }}</p>
+
+        <!-- 显示日期 -->
+        <p>日期：{{ search_result.date }}</p>
+
+        <div>
+          <p onclick="showSnapshot('{{ search_result.url }}')" style="cursor: pointer; text-decoration: underline; color: blue;">网页快照</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 定义处理点击事件的函数
+        function handleLinkClick(link) {
+            link.addEventListener('click', function (event) {
+                event.preventDefault(); // 阻止默认行为，即阻止跳转到链接的URL
+
+                var url = link.getAttribute('data-url');
+
+                // 发送AJAX请求将URL发送到app.py进行处理
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/process-url', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        // 在请求成功后，通过JavaScript进行页面跳转
+                        window.location.href = url;
+                    } else {
+                        // 处理请求失败的情况
+                        console.error('Error processing URL:', xhr.responseText);
+                    }
+                };
+
+                xhr.send(JSON.stringify({ url: url }));
+            });
+        }
+
+        // 获取所有标题链接元素
+        var resultLinks = document.querySelectorAll('.result-link');
+        var likeItemLinks = document.querySelectorAll('.recommend-link');
+
+        // 为每个标题链接和 .like_item 链接添加点击事件监听器
+        resultLinks.forEach(function (link) {
+            handleLinkClick(link);
+        });
+
+        likeItemLinks.forEach(function (link) {
+            handleLinkClick(link);
+        });
+    });
+  </script>
+
+  <script>
+      function showSnapshot(url) {
+        // 将url按"/"划分，并获取倒数第二个部分
+        var parts = url.split('/');
+        var snapshotIndex = parts[parts.length - 2];
+
+        // 将文件路径传递给 show_snapshot.html 页面
+        window.location.href = `/show_snapshot/${snapshotIndex}`;
+    }
+  </script>
+
+</body>
+</html>
